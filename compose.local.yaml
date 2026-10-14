@@ -1,0 +1,8 @@
+# Local testing override: plain HTTP on http://localhost:8080, no certificate needed.
+#   docker compose -f compose.yaml -f compose.local.yaml up -d --build
+services:
+  web:
+    ports: !override
+      - "8080:80"
+    volumes: !override
+      - ./nginx/nginx.local.conf:/etc/nginx/nginx.conf:ro

@@ -1,0 +1,26 @@
+# secrets & local config
+.env
+.env.*
+!.env.example
+nginx/certs/*
+!nginx/certs/.gitkeep
+*.pem
+*.key
+
+# build output
+node_modules/
+frontend/dist/
+backend/target/
+coverage/
+
+# runtime data & backups (never commit database dumps)
+backups/
+data/
+*.sql.gz
+*.db
+
+# OS / editors
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

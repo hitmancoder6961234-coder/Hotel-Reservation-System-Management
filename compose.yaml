@@ -1,0 +1,106 @@
+# ============================================================================
+#  StayEase - Docker Compose stack
+#
+#    internet -> Cloudflare -> [web: nginx :80/:443] -> [backend: Tomcat :8080] -> [db: MySQL :3306]
+#
+#  Networks
+#    edge     web <-> backend                (backend is never published)
+#    data     backend <-> db  (internal)     (MySQL is never published, no internet access)
+#  Persistent data
+#    named volume `db_data` holds the MySQL files. It survives restarts and redeploys.
+#    NEVER run `docker compose down -v` on the server: that deletes the database volume.
+#
+#  Secrets live in .env (copy .env.example). .env is not committed.
+#  Production : docker compose up -d --build
+#  Local test : docker compose -f compose.yaml -f compose.local.yaml up -d --build
+# ============================================================================
+name: stayease
+
+services:
+  db:
+    image: mysql:8.4
+    container_name: stayease-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?set MYSQL_ROOT_PASSWORD in .env}
+      MYSQL_DATABASE: ${DB_NAME:-stayease}
+      APP_DB_USER: ${DB_USER:-stayease_app}
+      APP_DB_PASSWORD: ${DB_PASSWORD:?set DB_PASSWORD in .env}
+      TZ: ${TZ:-Asia/Kolkata}
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_0900_ai_ci
+      - --default-time-zone=+00:00
+    volumes:
+      - db_data:/var/lib/mysql
+      # first-start scripts: app user (least privilege) -> schema -> seed rooms
+      - ./database/init:/docker-entrypoint-initdb.d:ro
+    networks:
+      - data
+    # No `ports:` on purpose - MySQL is reachable only from the backend container.
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p\"$$MYSQL_ROOT_PASSWORD\" --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 40s
+
+  backend:
+    build:
+      context: ./backend
+    image: ${IMAGE_PREFIX:-stayease}-backend:${IMAGE_TAG:-latest}
+    container_name: stayease-backend
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DB_HOST: db
+      DB_PORT: "3306"
+      DB_NAME: ${DB_NAME:-stayease}
+      DB_USER: ${DB_USER:-stayease_app}
+      DB_PASSWORD: ${DB_PASSWORD:?set DB_PASSWORD in .env}
+      APP_TIMEZONE: ${APP_TIMEZONE:-Asia/Kolkata}
+    networks:
+      - edge
+      - data
+    # No `ports:` - only nginx (same `edge` network) can reach Tomcat.
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:8080/api >/dev/null || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+
+  web:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    image: ${IMAGE_PREFIX:-stayease}-web:${IMAGE_TAG:-latest}
+    container_name: stayease-web
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      # Cloudflare Origin Certificate (origin.pem + origin.key) - see docs/DEPLOYMENT.md
+      - ./nginx/certs:/etc/nginx/certs:ro
+    networks:
+      - edge
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1/healthz >/dev/null || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+networks:
+  edge: {}
+  data:
+    internal: true   # no route to the internet; only db <-> backend
+
+volumes:
+  db_data: {}

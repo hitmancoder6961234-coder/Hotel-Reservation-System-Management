@@ -1,0 +1,5 @@
+/* The original app used next/font to define these two CSS variables. */
+:root {
+  --font-inter: "Inter Variable", "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-playfair: "Playfair Display Variable", "Playfair Display", Georgia, serif;
+}

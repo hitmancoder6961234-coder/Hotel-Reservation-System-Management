@@ -1,0 +1,16 @@
+# Keeps the Docker build context small and free of secrets.
+.git
+.github
+.env
+.env.*
+!.env.example
+nginx/certs
+backups
+docs
+scripts
+database
+**/node_modules
+frontend/dist
+backend/target
+**/*.log
+*.md
