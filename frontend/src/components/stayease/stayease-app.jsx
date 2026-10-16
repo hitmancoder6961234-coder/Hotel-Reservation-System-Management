@@ -8,6 +8,7 @@ import { RoomsView } from "./rooms-view";
 import { RoomDetailsView } from "./room-details-view";
 import { BookingView } from "./booking-view";
 import { ConfirmationView } from "./confirmation-view";
+import { AdminView } from "./admin-view";
 import { Button } from "@/components/ui/button";
 function ViewSkeleton() {
   return (
@@ -88,6 +89,9 @@ export function StayEaseApp() {
         bookingRef={decodeURIComponent(segments[1])}
       />
     );
+  } else if (segments[0] === "admin") {
+    // Admin area (not linked from the public site); independent of the rooms list.
+    view = <AdminView />;
   } else if (loading) {
     view = <ViewSkeleton />;
   } else if (error) {

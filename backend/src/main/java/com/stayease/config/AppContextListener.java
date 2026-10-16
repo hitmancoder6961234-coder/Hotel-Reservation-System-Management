@@ -6,6 +6,7 @@ import com.stayease.repository.BookingRepository;
 import com.stayease.repository.JdbcBookingRepository;
 import com.stayease.repository.JdbcRoomRepository;
 import com.stayease.repository.RoomRepository;
+import com.stayease.security.AdminAuth;
 import com.stayease.service.BookingService;
 import com.stayease.service.RoomService;
 import com.stayease.web.AppServices;
@@ -56,6 +57,14 @@ public class AppContextListener implements ServletContextListener {
     event.getServletContext().setAttribute(
         AppServices.ATTRIBUTE,
         new AppServices(new RoomService(db, rooms, bookings, clock), new BookingService(db, rooms, bookings, clock)));
+    // The admin session cookie is Secure (HTTPS only). COOKIE_SECURE=false allows plain-HTTP testing by IP.
+    boolean secureCookie = !"false".equalsIgnoreCase(System.getenv("COOKIE_SECURE"));
+    event.getServletContext().getSessionCookieConfig().setSecure(secureCookie);
+    AdminAuth adminAuth = AdminAuth.fromEnv(System.getenv(), clock);
+    event.getServletContext().setAttribute(AdminAuth.ATTRIBUTE, adminAuth);
+    if (!adminAuth.isConfigured()) {
+      log.warn("ADMIN_USER / ADMIN_PASSWORD_HASH are not set - admin login is disabled");
+    }
     log.info("StayEase backend started (database {}:{}/{}, timezone {})",
         config.dbHost(), config.dbPort(), config.dbName(), config.timezone());
   }

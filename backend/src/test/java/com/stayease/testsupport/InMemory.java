@@ -4,6 +4,7 @@ import com.stayease.db.Db;
 import com.stayease.db.SqlFunction;
 import com.stayease.model.Availability.BookedRange;
 import com.stayease.model.Availability.Conflict;
+import com.stayease.model.AdminBooking;
 import com.stayease.model.Booking;
 import com.stayease.model.BookingDetail;
 import com.stayease.model.NewBooking;
@@ -122,6 +123,16 @@ public final class InMemory {
           b.roomId(), b.checkIn(), b.checkOut(), b.guests(), b.nights(), b.totalPrice(), b.status(), Instant.now());
       stored.add(saved);
       return saved;
+    }
+
+    @Override
+    public List<AdminBooking> findAllForAdmin(Connection c) {
+      return stored.stream()
+          .sorted(Comparator.comparingInt(Booking::id))
+          .map(b -> new AdminBooking(b.id(), b.bookingRef(), b.guestName(), b.email(), b.mobile(), b.roomId(),
+              rooms.findById(c, b.roomId()).orElseThrow().name(), b.checkIn(), b.checkOut(), b.guests(),
+              b.nights(), b.totalPrice(), b.status(), b.createdAt()))
+          .toList();
     }
 
     @Override

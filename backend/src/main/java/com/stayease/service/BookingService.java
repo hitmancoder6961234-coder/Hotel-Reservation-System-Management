@@ -1,6 +1,7 @@
 package com.stayease.service;
 
 import com.stayease.db.Db;
+import com.stayease.model.AdminBooking;
 import com.stayease.model.BookingDetail;
 import com.stayease.model.BookingResponse;
 import com.stayease.model.NewBooking;
@@ -14,6 +15,7 @@ import java.sql.SQLException;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -131,6 +133,11 @@ public class BookingService {
         throw e;
       }
     }
+  }
+
+  /** All bookings for the admin dashboard and the Excel export. */
+  public List<AdminBooking> listAll() throws SQLException {
+    return db.read(bookings::findAllForAdmin);
   }
 
   public BookingDetail getBooking(String reference) throws SQLException {

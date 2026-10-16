@@ -2,6 +2,7 @@ package com.stayease.repository;
 
 import com.stayease.model.Availability.BookedRange;
 import com.stayease.model.Availability.Conflict;
+import com.stayease.model.AdminBooking;
 import com.stayease.model.Booking;
 import com.stayease.model.BookingDetail;
 import com.stayease.model.NewBooking;
@@ -30,4 +31,7 @@ public interface BookingRepository {
   Booking insert(Connection connection, NewBooking booking) throws SQLException;
 
   Optional<BookingDetail> findDetailByRef(Connection connection, String bookingRef) throws SQLException;
+
+  /** Every booking with its room name, oldest first (admin dashboard / Excel export). */
+  List<AdminBooking> findAllForAdmin(Connection connection) throws SQLException;
 }

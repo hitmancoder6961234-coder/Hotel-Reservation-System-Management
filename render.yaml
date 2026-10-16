@@ -16,6 +16,10 @@ services:
         value: Asia/Kolkata
       - key: DB_SSL_MODE        # external MySQL hosts require TLS
         value: REQUIRED
+      - key: ADMIN_USER           # admin login (dashboard at /#/admin)
+        sync: false
+      - key: ADMIN_PASSWORD_HASH  # PBKDF2 hash, see docs/CLOUD-DEPLOY.md - never the plain password
+        sync: false
       - key: DB_HOST
         sync: false
       - key: DB_PORT

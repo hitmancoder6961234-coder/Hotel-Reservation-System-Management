@@ -2,6 +2,7 @@ package com.stayease.repository;
 
 import com.stayease.model.Availability.BookedRange;
 import com.stayease.model.Availability.Conflict;
+import com.stayease.model.AdminBooking;
 import com.stayease.model.Booking;
 import com.stayease.model.BookingDetail;
 import com.stayease.model.NewBooking;
@@ -139,6 +140,35 @@ public class JdbcBookingRepository implements BookingRepository {
             rows.getString("status"),
             readInstant(rows, "createdAt")));
       }
+    }
+  }
+
+  @Override
+  public List<AdminBooking> findAllForAdmin(Connection connection) throws SQLException {
+    String sql = "SELECT b.id, b.bookingRef, b.guestName, b.email, b.mobile, b.roomId, r.name AS roomName, "
+        + "b.checkIn, b.checkOut, b.guests, b.nights, b.totalPrice, b.status, b.createdAt "
+        + "FROM `Booking` b JOIN `Room` r ON r.id = b.roomId ORDER BY b.id ASC";
+    try (PreparedStatement statement = connection.prepareStatement(sql);
+        ResultSet rows = statement.executeQuery()) {
+      List<AdminBooking> all = new ArrayList<>();
+      while (rows.next()) {
+        all.add(new AdminBooking(
+            rows.getInt("id"),
+            rows.getString("bookingRef"),
+            rows.getString("guestName"),
+            rows.getString("email"),
+            rows.getString("mobile"),
+            rows.getInt("roomId"),
+            rows.getString("roomName"),
+            rows.getObject("checkIn", LocalDate.class),
+            rows.getObject("checkOut", LocalDate.class),
+            rows.getInt("guests"),
+            rows.getInt("nights"),
+            rows.getInt("totalPrice"),
+            rows.getString("status"),
+            readInstant(rows, "createdAt")));
+      }
+      return all;
     }
   }
 

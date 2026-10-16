@@ -6,9 +6,10 @@
 
   <display-name>StayEase Backend</display-name>
 
-  <!-- The API is stateless: no HTTP sessions. -->
+  <!-- The public API is stateless; the only session is the administrator login (30 minutes idle).
+       SameSite=Strict is set in META-INF/context.xml. -->
   <session-config>
-    <session-timeout>1</session-timeout>
+    <session-timeout>30</session-timeout>
     <cookie-config>
       <http-only>true</http-only>
       <secure>true</secure>

@@ -52,6 +52,13 @@
       <scope>runtime</scope>
     </dependency>
 
+    <!-- Excel (.xlsx) export with charts for the admin dashboard -->
+    <dependency>
+      <groupId>org.apache.poi</groupId>
+      <artifactId>poi-ooxml</artifactId>
+      <version>5.4.1</version>
+    </dependency>
+
     <!-- Logging: SLF4J -> java.util.logging (ends up in `docker logs`) -->
     <dependency>
       <groupId>org.slf4j</groupId>
