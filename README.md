@@ -102,6 +102,7 @@ message (details only in the server log).
 ## Deployment, backups, security
 
 * Ubuntu + Docker + Cloudflare step by step: **[docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)**
+* Vercel (frontend) + Render (backend) instead: **[docs/CLOUD-DEPLOY.md](docs/CLOUD-DEPLOY.md)**
 * Backup / restore: `scripts/backup.sh`, `scripts/restore.sh` (restore is non-destructive by default)
 * Secrets only in `.env` (git-ignored); MySQL and Tomcat are never published; the app uses a DML-only MySQL user;
   prepared statements everywhere; JSON errors without stack traces; API responses are `no-store`.

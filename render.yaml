@@ -1,0 +1,28 @@
+# Render Blueprint - backend only (Java Servlets on Tomcat, built from backend/Dockerfile).
+# The React frontend is deployed separately on Vercel (root directory: frontend).
+# Secrets (DB_*) are NOT stored here: Render asks for them in the dashboard (sync: false).
+services:
+  - type: web
+    name: stayease-api
+    runtime: docker
+    rootDir: backend            # deployment root = ./backend (also the Docker build context)
+    dockerfilePath: ./Dockerfile
+    plan: free
+    healthCheckPath: /api       # answers {"message":"Hello, world!"} without using the database
+    envVars:
+      - key: PORT               # Tomcat listens on 8080 (see backend/Dockerfile)
+        value: "8080"
+      - key: APP_TIMEZONE
+        value: Asia/Kolkata
+      - key: DB_SSL_MODE        # external MySQL hosts require TLS
+        value: REQUIRED
+      - key: DB_HOST
+        sync: false
+      - key: DB_PORT
+        sync: false
+      - key: DB_NAME
+        sync: false
+      - key: DB_USER
+        sync: false
+      - key: DB_PASSWORD
+        sync: false

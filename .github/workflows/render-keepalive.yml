@@ -1,0 +1,26 @@
+# Optional: pings the Render backend every 10 minutes to reduce free-tier cold starts.
+# Not a guarantee - Render may still spin the service down. Does nothing until the
+# repository variable RENDER_URL is set (Settings > Secrets and variables > Actions > Variables),
+# e.g. https://stayease-api.onrender.com/api
+name: Render Keep Alive
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Render backend
+        env:
+          RENDER_URL: ${{ vars.RENDER_URL }}
+        run: |
+          if [ -z "$RENDER_URL" ]; then
+            echo "RENDER_URL variable is not configured - skipping."
+            exit 0
+          fi
+          curl --fail --silent --show-error --max-time 60 "$RENDER_URL"
