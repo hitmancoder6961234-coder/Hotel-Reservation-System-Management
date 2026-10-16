@@ -4,6 +4,6 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "rewrites": [
-    { "source": "/api/:path*", "destination": "https://YOUR-RENDER-SERVICE.onrender.com/api/:path*" }
+    { "source": "/api/:path*", "destination": "https://stayease-api-9ea1.onrender.com/api/:path*" }
   ]
 }
